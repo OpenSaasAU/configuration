@@ -63,6 +63,7 @@
     pkg={{','.join(aws_debian_pkgs)}}
     state=present
     update_cache=yes
+  when: ansible_distribution in common_debian_variants
 
 - name: install aws python packages
   pip: >
@@ -105,6 +106,7 @@
   - "/usr/share/landscape/landscape-sysinfo.wrapper"
   - "/etc/update-motd.d/51-cloudguest"
   - "/etc/update-motd.d/91-release-upgrade"
+  when: ansible_distribution in common_debian_variants
 
 - name: update /etc/dhcp/dhclient.conf
   template: 
@@ -132,8 +134,16 @@
   register: sshd_config
   with_items:
     - { src: 'etc/ssh/sshd_config.j2', dest: '/etc/ssh/sshd_config' }
+  when: ansible_distribution in common_debian_variants
 
 - name: restart ssh
   service: name=ssh state=restarted
   sudo: True
   when: sshd_config.changed
+  when: ansible_distribution in common_debian_variants
+
+- name: restart ssh
+  service: name=sshd state=restarted
+  sudo: True
+  when: sshd_config.changed
+  when: ansible_distribution in common_redhat_variants
