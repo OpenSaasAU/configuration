@@ -18,3 +18,36 @@
 #   my_role_var0: "foo"
 #   my_role_var1: "bar"
 # }
+
+dependencies:
+  - role: add-user
+    user_name: "{{ edx_service_name }}"
+    user_home: "{{ edx_service_home }}"
+    group_name: "{{ common_web_group }}"
+    dirs:
+      - path: "{{ edx_service_home }}/venvs"
+        owner: "{{ edx_service_name }}"
+        group: "{{ common_web_group }}"
+      - path: "{{ edx_service_home }}/data"
+        owner: "{{ edx_service_name }}"
+        group: "{{ common_web_group }}"
+      - path: "{{ edx_service_home }}/staticfiles"
+        owner: "{{ edx_service_name }}"
+        group: "{{ common_web_group }}"
+
+      - path: "/edx/var/{{ edx_service_name }}"
+        owner: "{{ edx_service_user }}"
+        group: "{{ common_web_group }}"
+      - path: "/edx/etc/{{ edx_service_name }}"
+        owner: "{{ edx_service_user }}"
+        group: "{{ common_web_group }}"
+
+      - path: "{{ COMMON_LOG_DIR }}/{{ edx_service_name }}"
+        owner: "syslog"
+        group: "syslog"
+
+  - role: git-clone
+    repo_owner: "{{ edx_service_user }}"
+    repo_group: "{{ edx_service_user }}"
+    GIT_REPOS: "{{ edx_service_repos }}"
+    git_home: "{{ edx_service_home }}"
