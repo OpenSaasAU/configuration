@@ -53,7 +53,7 @@ mongo:
 # Need to build our own for ES 0.9
 es:
   container_name: es
-  image: edxops/elasticsearch:v1
+  image: opensaas/edx-elasticsearch
   volumes:
     - ${DOCKER_DATA_ROOT}/elasticsearch/data:/data
   ports:
@@ -73,7 +73,7 @@ memcache:
 
 nginx:
   container_name: nginx
-  image: edxops/nginx:v1
+  image: opensaas/edx-nginx
   ports:
    - 80:80
    - 443:443
@@ -93,7 +93,7 @@ forums:
   # Image built from the opencraft fork as it fixes
   # an auth bug.  Update when the change merges
   # upstream
-  image: edxops/forums:opencraft-v2
+  image: opensaas/edx-forums
   volumes:
     - ${DOCKER_EDX_ROOT}/cs_comments_service:/edx/app/forum/cs_comments_service
   ports:
@@ -102,7 +102,7 @@ forums:
 
 xqueue:
   container_name: xqueue
-  image: edxops/xqueue:v1
+  image: opensaas/edx-xqueue
   ports:
     - 8040:8040
     - 18040:18040
@@ -112,7 +112,7 @@ xqueue:
 
 lms:
   container_name: lms
-  image: edxops/edxapp:v2
+  image: opensaas/edxapp
   ports:
     - 8000:8000
     - 18000:18000
@@ -122,7 +122,7 @@ lms:
 
 cms:
   container_name: cms
-  image: edxops/edxapp:v2
+  image: opensaas/edxapp
   ports:
     - 8010:8010
     - 18010:18010
