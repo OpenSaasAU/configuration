@@ -1,0 +1,12 @@
+- name: Deploy elasticsearch
+  hosts: all
+  sudo: True
+  gather_facts: True
+  vars:
+    serial_count: 1
+  serial: "{{ serial_count }}"
+  roles:
+   - common_vars
+   - docker
+   - elasticsearch
+   - oraclejdk
