@@ -1,3 +1,4 @@
+version: '2'
 #
 # Single Docker Compose cluster that will eventually start
 # all edX services in a single flock of coordinated containers
@@ -26,105 +27,95 @@
 # guests can access your local filesystem for storing persistent data
 # files, say MongoDB or MySQL data files.
 #
-
-db:
-  container_name: db
-  image: mysql:5.6
+services:
+ db:
+  image: mysql:5.7
   environment:
-    - MYSQL_ROOT_PASSWORD='password'
-    #- MYSQL_DATABASE=''
-    - MYSQL_USER='migrate'
-    - MYSQL_PASSWORD='password'
+   MYSQL_ROOT_PASSWORD: password
+   MYSQL_DATABASE: edxapp
+   MYSQL_USER: edxapp001
+   MYSQL_PASSWORD: password
   volumes:
-    - ${DOCKER_DATA_ROOT}/mysql/data:/data
+   - ${DOCKER_DATA_ROOT}/mysql/data:/var/lib/mysql
   ports:
-    - 3306:3306
+   - 3306:3306
 
 
-mongo:
-  container_name: mongo
-  image: mongo:3.0
+ mongo:
+  image: mongo:3.3
   volumes:
-    - ${DOCKER_DATA_ROOT}/mongo/data:/data
+   - ${DOCKER_DATA_ROOT}/mongo/data:/data/db
   ports:
-    - 27017:27017
+   - 27017:27017
 
 
 # Need to build our own for ES 0.9
-es:
-  container_name: es
+ es:
   image: opensaas/edx-elasticsearch
   volumes:
-    - ${DOCKER_DATA_ROOT}/elasticsearch/data:/data
+   - ${DOCKER_DATA_ROOT}/elasticsearch/data:/data
   ports:
-    - 9100:9100
-    - 9200:9200
-    - 9300:9300
+   - 9100:9100
+   - 9200:9200
+   - 9300:9300
 
 
-memcache:
-  container_name: memcache
+ memcache:
   image: memcached:1.4.24
   volumes:
-    - ${DOCKER_DATA_ROOT}/memcache/data:/data
+   - ${DOCKER_DATA_ROOT}/memcache/data:/data
   ports:
-    - 11211:11211
+   - 11211:11211
 
 
-nginx:
-  container_name: nginx
+ nginx:
   image: opensaas/edx-nginx
   ports:
    - 80:80
    - 443:443
 
 
-rabbitmq:
-  container_name: rabbitmq
+ rabbitmq:
   image: rabbitmq:3.5.3
   volumes:
-    - ${DOCKER_DATA_ROOT}/rabbitmq/data:/data
+   - ${DOCKER_DATA_ROOT}/rabbitmq/data:/var/lib/rabbitmq
   ports:
-    - 5672:5672
+   - 5672:5672
 
 
-forums:
-  container_name: forums
+ forums:
   # Image built from the opencraft fork as it fixes
   # an auth bug.  Update when the change merges
   # upstream
   image: opensaas/edx-forums
   volumes:
-    - ${DOCKER_EDX_ROOT}/cs_comments_service:/edx/app/forum/cs_comments_service
+   - ${DOCKER_EDX_ROOT}/cs_comments_service:/edx/app/forum/cs_comments_service
   ports:
-    - 4567:4567
+   - 4567:4567
 
 
-xqueue:
-  container_name: xqueue
+ xqueue:
   image: opensaas/edx-xqueue
   ports:
-    - 8040:8040
-    - 18040:18040
+   - 8040:8040
+   - 18040:18040
   volumes:
-    - ${DOCKER_EDX_ROOT}/xqueue:/edx/app/edxapp/xqueue
+   - ${DOCKER_EDX_ROOT}/xqueue:/edx/app/edxapp/xqueue
 
 
-lms:
-  container_name: lms
+ lms:
   image: opensaas/edxapp
   ports:
-    - 8000:8000
-    - 18000:18000
+   - 8000:8000
+   - 18000:18000
   volumes:
-    - ${DOCKER_EDX_ROOT}/edx-platform:/edx/app/edxapp/edx-platform
+   - ${DOCKER_EDX_ROOT}/edx-platform:/edx/app/edxapp/edx-platform
 
 
-cms:
-  container_name: cms
+ cms:
   image: opensaas/edxapp
   ports:
-    - 8010:8010
-    - 18010:18010
+   - 8010:8010
+   - 18010:18010
   volumes:
-    - ${DOCKER_EDX_ROOT}/edx-platform:/edx/app/edxapp/edx-platform
+   - ${DOCKER_EDX_ROOT}/edx-platform:/edx/app/edxapp/edx-platform
