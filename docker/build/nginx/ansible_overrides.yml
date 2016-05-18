@@ -1,3 +1,30 @@
 ---
 
 FLOCK_TLD: "edx"
+
+nginx_xserver_gunicorn_hosts:
+  - xqueue
+nginx_xqueue_gunicorn_hosts:
+  - xqueue
+nginx_ora_gunicorn_hosts:
+  - cms
+nginx_lms_gunicorn_hosts:
+  - lms
+nginx_lms_preview_gunicorn_hosts:
+  - lms
+nginx_cms_gunicorn_hosts:
+  - cms
+nginx_analytics_api_gunicorn_hosts:
+  - cms
+nginx_insights_gunicorn_hosts:
+  - cms
+nginx_gitreload_gunicorn_hosts:
+  - cms
+nginx_edx_notes_api_gunicorn_hosts:
+  - lms
+nginx_ecommerce_gunicorn_hosts:
+  - lms
+nginx_programs_gunicorn_hosts:
+  - lms
+nginx_credentails_gunicorn_hosts:
+  - cms

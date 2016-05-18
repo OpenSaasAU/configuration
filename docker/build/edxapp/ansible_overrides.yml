@@ -5,6 +5,16 @@ DOCKER_TLD: "edx"
 # prevents Travis from giving up on the build
 COMMON_PIP_VERBOSITY: "-vvvv"
 
-EDXAPP_MYSQL_HOST: "db.{{ DOCKER_TLD }}"
+EDXAPP_MYSQL_HOST: "db"
 EDXAPP_MONGO_HOSTS:
-  - "mongo.{{ DOCKER_TLD }}"
+  - "mongo"
+
+EDXAPP_ELASTIC_SEARCH_CONFIG:
+ - host: "es"
+   port: 9200
+   
+EDXAPP_MEMCACHE: [ 'memcache:11211' ]
+
+EDXAPP_LMS_SITE_NAME: 'lms'
+EDXAPP_CMS_SITE_NAME: 'cms'
+EDXAPP_RABBIT_HOSTNAME: 'rabbitmq'
