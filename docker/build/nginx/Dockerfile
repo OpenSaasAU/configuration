@@ -8,10 +8,7 @@ WORKDIR /edx/app/edx_ansible/edx_ansible/docker/plays
 
 RUN /edx/app/edx_ansible/venvs/edx_ansible/bin/ansible-playbook nginx.yml -c local \
    -i '127.0.0.1,' \
-   -e@roles/edxapp/defaults/main.yml \
-   -e@roles/xqueue/defaults/main.yml \
-   -e@roles/certs/defaults/main.yml \
-   -e@roles/forum/defaults/main.yml
+   -e@/ansible_overrides.yml
 
 RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
 WORKDIR /etc/nginx
