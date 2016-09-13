@@ -13,7 +13,7 @@
 GO_SERVER_SERVICE_NAME: "go-server"
 GO_SERVER_USER: "go"
 GO_SERVER_GROUP: "{{ GO_SERVER_USER }}"
-GO_SERVER_VERSION: "16.1.0-2855"
+GO_SERVER_VERSION: "16.5.0-3305"
 GO_SERVER_HOME: "/var/lib/go-server"
 GO_SERVER_CONF_HOME: "/etc/go"
 GO_SERVER_PLUGIN_DIR: "{{ GO_SERVER_HOME }}/plugins/external/"
@@ -28,8 +28,8 @@ GO_SERVER_ORACLEJDK_LINK: "/usr/lib/jvm/java-7-oracle"
 GO_SERVER_JAVA_HOME: "{{ GO_SERVER_ORACLEJDK_LINK }}"
 
 # Aptitude settings
-GO_SERVER_APT_SOURCE: "deb http://dl.bintray.com/gocd/gocd-deb/ /"
-GO_SERVER_APT_KEY_URL: "https://bintray.com/user/downloadSubjectPublicKey?username=gocd"
+GO_SERVER_APT_SOURCE: "deb https://download.go.cd /"
+GO_SERVER_APT_KEY_URL: "https://download.go.cd/GOCD-GPG-KEY.asc"
 GO_SERVER_APT_NAME: "go-server"
 GO_SERVER_APT_PKGS: ["apache2-utils"]
 
@@ -50,6 +50,8 @@ GO_SERVER_ADMIN_USERNAME: ""
 GO_SERVER_ADMIN_PASSWORD: ""
 GO_SERVER_BACKUP_USERNAME: ""
 GO_SERVER_BACKUP_PASSWORD: ""
+GO_SERVER_GOMATIC_USERNAME: ""
+GO_SERVER_GOMATIC_PASSWORD: ""
 
 # go-server network settings
 GO_SERVER_PORT: 8153
@@ -64,7 +66,7 @@ GO_SERVER_H2DB_BACKUP_PATH: "artifacts/db_backup/"
 GO_SERVER_H2DB_BACKUP_LOCATION: "{{ GO_SERVER_HOME }}/{{ GO_SERVER_H2DB_BACKUP_PATH }}/{{ GO_SERVER_H2DB_NAME }}"
 
 # For use in backup/restore of a GoCD configuration.
-GO_SERVER_BACKUP_ENVIRONMENT: "sandbox"
+GO_SERVER_BACKUP_ENVIRONMENT: "{{ COMMON_ENVIRONMENT }}"
 GO_SERVER_BACKUP_SNITCH_URL: "https://nosnch.in/4444444444"
 GO_SERVER_BACKUP_FILENAME: "go-server-latest-backup.tgz"
 GO_SERVER_TEMP_RESTORE_DIRECTORY: "/tmp/go-server-backup"
@@ -77,10 +79,10 @@ GO_SERVER_BACKUP_TMP_LOCATION: "/tmp/{{ GO_SERVER_BACKUP_FILENAME }}"
 GO_SERVER_BACKUP_CRON_SCRIPT_LOCATION: "/root/gocd_backup.sh"
 
 # When "true", attempts to restore go-server backup from S3.
-GO_SERVER_RESTORE_BACKUP: "false"
+GO_SERVER_RESTORE_BACKUP: false
 
 # When "true", attempts to configure regular, cron-based backups to S3 on go-server.
-GO_SERVER_CONFIGURE_BACKUPS: "false"
+GO_SERVER_CONFIGURE_BACKUPS: false
 
 # password file setup
 GO_SERVER_PASSWORD_FILE_NAME: "password.txt"

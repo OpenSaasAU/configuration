@@ -83,11 +83,20 @@ services:
    - 5672:5672
 
 
+<<<<<<< HEAD
  forums:
   # Image built from the opencraft fork as it fixes
   # an auth bug.  Update when the change merges
   # upstream
   image: opensaas/edx-forums
+=======
+forum:
+  container_name: forum
+  # Image built from the opencraft fork as it fixes
+  # an auth bug.  Update when the change merges
+  # upstream
+  image: edxops/forum:opencraft-v2
+>>>>>>> upstream/master
   volumes:
    - ${DOCKER_EDX_ROOT}/cs_comments_service:/edx/app/forum/cs_comments_service
   ports:

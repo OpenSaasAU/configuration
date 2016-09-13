@@ -32,9 +32,9 @@ sudo apt-get upgrade -y
 ## Install system pre-requisites
 ##
 sudo apt-get install -y build-essential software-properties-common curl git-core libxml2-dev libxslt1-dev python-pip libmysqlclient-dev python-apt python-dev libxmlsec1-dev libfreetype6-dev swig gcc-4.8 g++-4.8
-sudo pip install --upgrade pip==7.1.2
-sudo pip install --upgrade setuptools==18.3.2
-sudo -H pip install --upgrade virtualenv==13.1.2
+sudo pip install --upgrade pip==8.1.2
+sudo pip install --upgrade setuptools==24.0.3
+sudo -H pip install --upgrade virtualenv==15.0.2
 
 ##
 ## Update alternatives so that gcc/g++ 4.8 is the default compiler
@@ -49,6 +49,10 @@ if [ -n "$OPENEDX_RELEASE" ]; then
     -e forum_version=$OPENEDX_RELEASE \
     -e xqueue_version=$OPENEDX_RELEASE \
     -e configuration_version=$OPENEDX_RELEASE \
+    -e demo_version=$OPENEDX_RELEASE \
+    -e NOTIFIER_VERSION=$OPENEDX_RELEASE \
+    -e INSIGHTS_VERSION=$OPENEDX_RELEASE \
+    -e ANALYTICS_API_VERSION=$OPENEDX_RELEASE \
   $EXTRA_VARS"
   CONFIG_VER=$OPENEDX_RELEASE
 else

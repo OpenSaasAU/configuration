@@ -1,0 +1,19 @@
+---
+
+FLOCK_TLD: "edx"
+
+FORUM_MONGO_HOSTS:
+<<<<<<< HEAD:docker/build/forums/ansible_overrides.yml
+  - 'mongo'
+  
+FORUM_ELASTICSEARCH_HOST: 'es'
+forum_source_repo: "https://github.com/open-craft/cs_comments_service.git"
+forum_version: "mongoid5"
+=======
+  - mongo.{{ FLOCK_TLD }}
+
+FORUM_ELASTICSEARCH_HOST: "es.{{ FLOCK_TLD }}"
+>>>>>>> upstream/master:docker/build/forum/ansible_overrides.yml
+FORUM_USE_TCP: "true"
+FORUM_RACK_ENV: "staging"
+FORUM_SINATRA_ENV: "staging"

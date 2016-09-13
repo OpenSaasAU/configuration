@@ -4,7 +4,7 @@ SHARD=0
 SHARDS=1
 
 dockerfiles:=$(shell ls docker/build/*/Dockerfile)
-images:=$(patsubst docker/build/%/Dockerfile,%,$(dockerfiles))
+images:=$(shell git diff --name-only $(TRAVIS_COMMIT_RANGE) | python util/parsefiles.py)
 
 docker_build=docker.build.
 docker_test=docker.test.
@@ -26,7 +26,7 @@ pkg: docker.pkg
 clean:
 	rm -rf .build
 
-docker.test.shard: $(foreach image,$(shell echo $(images) | tr ' ' '\n' | awk 'NR%$(SHARDS)==$(SHARD)'),$(docker_test)$(image))
+docker.test.shard: $(foreach image,$(shell echo $(images) | python util/balancecontainers.py $(SHARDS) | awk 'NR%$(SHARDS)==$(SHARD)'),$(docker_test)$(image))
 
 docker.build: $(foreach image,$(images),$(docker_build)$(image))
 docker.test: $(foreach image,$(images),$(docker_test)$(image))

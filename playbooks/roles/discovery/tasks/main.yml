@@ -10,13 +10,13 @@
 #
 #
 # Tasks for role discovery
-# 
+#
 # Overview:
-# 
+#
 #
 # Dependencies:
 #
-# 
+#
 # Example play:
 #
 #
@@ -25,7 +25,7 @@
   template:
     src: edx/app/discovery/discovery_gunicorn.py.j2
     dest: "{{ discovery_home }}/discovery_gunicorn.py"
-  sudo_user: "{{ discovery_user }}"
+  become_user: "{{ discovery_user }}"
   tags:
     - install
     - install:configuration
@@ -38,7 +38,7 @@
     - install:system-requirements
 
 - name: install python3.5
-  apt: 
+  apt:
     name: "{{ item }}"
   with_items:
     - python3.5
@@ -51,7 +51,7 @@
   command: "virtualenv --python=python3.5 {{ discovery_venv_dir }}"
   args:
     creates: "{{ discovery_venv_dir }}/bin/pip"
-  sudo_user: "{{ discovery_user }}"
+  become_user: "{{ discovery_user }}"
   tags:
     - install
     - install:system-requirements
@@ -60,7 +60,7 @@
   command: make production-requirements
   args:
     chdir: "{{ discovery_code_dir }}"
-  sudo_user: "{{ discovery_user }}"
+  become_user: "{{ discovery_user }}"
   environment: "{{ discovery_environment }}"
   tags:
     - install
@@ -70,17 +70,43 @@
   command: make requirements
   args:
     chdir: "{{ discovery_code_dir }}"
-  sudo_user: "{{ discovery_user }}"
+  become_user: "{{ discovery_user }}"
   environment: "{{ discovery_environment }}"
   tags:
     - devstack
     - devstack:install
 
+- name: create nodeenv
+  shell: >
+    creates={{ discovery_nodeenv_dir }}
+    {{ discovery_venv_dir }}/bin/nodeenv {{ discovery_nodeenv_dir }} --node={{ discovery_node_version }} --prebuilt
+  become_user: "{{ discovery_user }}"
+  tags:
+    - install
+    - install:app-requirements
+
+- name: install node dependencies
+  npm: executable={{ discovery_nodeenv_bin }}/npm path={{ discovery_code_dir }} production=yes
+  become_user: "{{ discovery_user }}"
+  environment: "{{ discovery_environment }}"
+  tags:
+    - install
+    - install:app-requirements
+
+- name: install bower dependencies
+  shell: >
+    chdir={{ discovery_code_dir }}
+    . {{ discovery_nodeenv_bin }}/activate && {{ discovery_node_bin }}/bower install --production --config.interactive=false
+  become_user: "{{ discovery_user }}"
+  tags:
+    - install
+    - install:app-requirements
+
 - name: migrate database
   command: make migrate
   args:
     chdir: "{{ discovery_code_dir }}"
-  sudo_user: "{{ discovery_user }}"
+  become_user: "{{ discovery_user }}"
   environment: "{{ discovery_migration_environment }}"
   when: migrate_db is defined and migrate_db|lower == "yes"
   tags:
@@ -172,25 +198,25 @@
   tags:
     - install
     - install:app-requirements
-    
+
 - name: run collectstatic
   command: make static
   args:
     chdir: "{{ discovery_code_dir }}"
-  sudo_user: "{{ discovery_user }}"
+  become_user: "{{ discovery_user }}"
   environment: "{{ discovery_environment }}"
   tags:
     - assets
     - assets:gather
 
 - name: restart the application
-  supervisorctl: 
+  supervisorctl:
     state: restarted
     supervisorctl_path: "{{ supervisor_ctl }}"
     config: "{{ supervisor_cfg }}"
     name: "{{ discovery_service_name }}"
   when: not disable_edx_services
-  sudo_user: "{{ supervisor_service_user }}"
+  become_user: "{{ supervisor_service_user }}"
   tags:
     - manage
     - manage:start
@@ -199,7 +225,7 @@
   template:
     src: "edx/app/nginx/sites-available/discovery.j2"
     dest: "{{ nginx_sites_available_dir }}/discovery"
-    owner: root 
+    owner: root
     group: "{{ common_web_user }}"
     mode: 0640
   notify: reload nginx
@@ -211,8 +237,8 @@
   file:
     src: "{{ nginx_sites_available_dir }}/discovery"
     dest: "{{ nginx_sites_enabled_dir }}/discovery"
-    state: link 
-    owner: root 
+    state: link
+    owner: root
     group: root
   notify: reload nginx
   tags:

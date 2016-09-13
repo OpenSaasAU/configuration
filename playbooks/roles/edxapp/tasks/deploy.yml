@@ -1,54 +1,36 @@
-- name: setup the edxapp env
-  template: >
-    src=edxapp_env.j2 dest={{ edxapp_app_dir }}/edxapp_env
-    owner={{ edxapp_user }}  group={{ common_web_user }}
-    mode=0644
-  tags:
-    - install
-    - install:configuration
-
+---
 - name: create edxapp configuration dir
-  file: >
-    path="{{ EDXAPP_CFG_DIR }}" state=directory
-    owner="{{ edxapp_user }}" group="{{ common_web_group }}"
-  tags:
-    - install
-    - install:configuration
-
-- name: setup the newrelic python agent config
-  template:
-    src: "newrelic.ini.j2"
-    dest: "{{ edxapp_app_dir }}/newrelic.ini"
+  file:
+    path: "{{ EDXAPP_CFG_DIR }}" 
+    state: directory
     owner: "{{ edxapp_user }}"
-    group: "{{ common_web_user }}"
-    mode: "0644"
-  tags:
-    - install
-    - install:configuration
-
-# Optional auth for git
-- name: create ssh script for git (not authenticated)
-  template: >
-    src=git_ssh_noauth.sh.j2 dest={{ edxapp_git_ssh }}
-    owner={{ edxapp_user }} mode=750
-  when: not EDXAPP_USE_GIT_IDENTITY
+    group: "{{ common_web_group }}"
   tags:
     - install
     - install:base
 
-- name: create ssh script for git (authenticated)
-  template: >
-    src=git_ssh_auth.sh.j2 dest={{ edxapp_git_ssh }}
-    owner={{ edxapp_user }} mode=750
-  when: EDXAPP_USE_GIT_IDENTITY
+- name: copy the template to the desired location
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"  
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: 'edxapp_env.j2', dest: '{{ edxapp_app_dir }}/edxapp_env', owner: '{{ edxapp_user }}', group: '{{ common_web_user }}', mode: '0644' }
+    - { src: 'newrelic.ini.j2', dest: '{{ edxapp_app_dir }}/newrelic.ini', owner: '{{ edxapp_user }}', group: '{{ common_web_user }}', mode: '0644' }
+    - { src: 'git_ssh.sh.j2', dest: '{{ edxapp_git_ssh }}', owner: '{{ edxapp_user }}', group: '{{ edxapp_user }}', mode: '0750' }
   tags:
     - install
     - install:base
 
 - name: install read-only ssh key
-  copy: >
-    content="{{ EDXAPP_GIT_IDENTITY }}" dest={{ edxapp_git_identity }}
-    force=yes owner={{ edxapp_user }} mode=0600
+  copy:
+    content: "{{ EDXAPP_GIT_IDENTITY }}"
+    dest: "{{ edxapp_git_identity }}"
+    force: yes
+    owner: "{{ edxapp_user }}"
+    mode: "0600"
   when: EDXAPP_USE_GIT_IDENTITY
   tags:
     - install
@@ -56,19 +38,23 @@
 
 - name: set git fetch.prune to ignore deleted remote refs
   shell: git config --global fetch.prune true
+<<<<<<< HEAD
 #  sudo_user: "{{ edxapp_user }}"
+=======
+  become_user: "{{ edxapp_user }}"
+>>>>>>> upstream/master
   tags:
     - install
     - install:base
 
 # Do A Checkout
 - name: checkout edx-platform repo into {{ edxapp_code_dir }}
-  git_2_0_1: >
-    dest={{ edxapp_code_dir }}
-    repo={{ edx_platform_repo }}
-    version={{ edx_platform_version }}
-    accept_hostkey=yes
-  sudo_user: "{{ edxapp_user }}"
+  git_2_0_1:
+    dest: "{{ edxapp_code_dir }}"
+    repo: "{{ edx_platform_repo }}"
+    version: "{{ edx_platform_version }}"
+    accept_hostkey: yes
+  become_user: "{{ edxapp_user }}"
   environment:
     GIT_SSH: "{{ edxapp_git_ssh }}"
   register: edxapp_platform_checkout
@@ -78,7 +64,7 @@
 
 - name: git clean after checking out edx-platform
   shell: cd {{ edxapp_code_dir }} && git clean -xdf
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   tags:
     - install
     - install:code
@@ -90,13 +76,13 @@
 # (yes, lowercase) to a Stanford-style theme and set
 # edxapp_theme_name (again, lowercase) to its name.
 - name: checkout Stanford-style theme
-  git_2_0_1: >
-    dest={{ edxapp_app_dir }}/themes/{{ edxapp_theme_name }}
-    repo={{ edxapp_theme_source_repo }}
-    version={{ edxapp_theme_version }}
-    accept_hostkey=yes
+  git_2_0_1:
+    dest: "{{ edxapp_app_dir }}/themes/{{ edxapp_theme_name }}"
+    repo: "{{ edxapp_theme_source_repo }}"
+    version: "{{ edxapp_theme_version }}"
+    accept_hostkey: yes
   when: edxapp_theme_name != ''
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   environment:
     GIT_SSH: "{{ edxapp_git_ssh }}"
   register: edxapp_theme_checkout
@@ -104,27 +90,9 @@
     - install
     - install:code
 
-# To enable Comprehensive theming, point
-# EDXAPP_COMPREHENSIVE_THEME_SOURCE_REPO to your theme repo, and set
-# EDXAPP_COMPREHENSIVE_THEME_DIR to the directory you want to check
-# out to.
-- name: checkout comprehensive theme
-  git_2_0_1: >
-    dest={{ EDXAPP_COMPREHENSIVE_THEME_DIR }}
-    repo={{ EDXAPP_COMPREHENSIVE_THEME_SOURCE_REPO }}
-    version={{ EDXAPP_COMPREHENSIVE_THEME_VERSION }}
-    accept_hostkey=yes
-  when: EDXAPP_COMPREHENSIVE_THEME_SOURCE_REPO != ''
-  sudo_user: "{{ edxapp_user }}"
-  environment:
-    GIT_SSH: "{{ edxapp_git_ssh }}"
-  register: edxapp_comprehensive_theme_checkout
-  tags:
-    - install
-    - install:code
-
 - name: Stat each requirements file with Github URLs to ensure it exists
-  stat: path="{{ item }}"
+  stat:
+    path: "{{ item }}"
   with_items: "{{ edxapp_requirements_with_github_urls }}"
   register: requirement_file_stats
   tags:
@@ -137,7 +105,7 @@
 - name: Updating requirement files for git mirror
   command: |
     /bin/sed -i -e 's/github\.com/{{ COMMON_GIT_MIRROR }}/g' {{ item.item }}
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   when: item.stat.exists
   with_items: "{{ requirement_file_stats.results }}"
   tags:
@@ -160,8 +128,9 @@
 # Set the npm registry permissions
 - name: Set the npm registry permissions
   file:
-    path="{{ edxapp_app_dir }}/.npmrc"
-    owner=edxapp group=edxapp
+    path: "{{ edxapp_app_dir }}/.npmrc"
+    owner: "{{ edxapp_user }}"
+    group: "{{ edxapp_user }}"
   tags:
     - install
     - install:app-requirements
@@ -169,7 +138,7 @@
 # Node play that need to be run after platform updates.
 - name: Install edx-platform npm dependencies
   shell: npm install chdir={{ edxapp_code_dir }}
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   environment: "{{ edxapp_environment }}"
   tags:
     - install
@@ -180,14 +149,15 @@
     virtualenv {{ edxapp_venv_dir }}
     chdir={{ edxapp_code_dir }}
     creates={{ edxapp_venv_dir }}/bin/pip
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   environment: "{{ edxapp_environment }}"
   tags:
     - install
     - install:app-requirements
 
 - name: Stat each Python requirements file to ensure it exists
-  stat: path="{{ item }}"
+  stat:
+    path: "{{ item }}"
   with_items: "{{ edxapp_requirements_files }}"
   register: python_requirement_files
   tags:
@@ -195,14 +165,14 @@
     - install:app-requirements
 
 # Install the python requirements into {{ edxapp_venv_dir }}
-- name : install python requirements
+- name: install python requirements
   # Need to use command rather than pip so that we can maintain the context of our current working directory; some
   # requirements are pathed relative to the edx-platform repo. Using the pip from inside the virtual environment implicitly
   # installs everything into that virtual environment.
   command: >
     {{ edxapp_venv_dir }}/bin/pip install {{ COMMON_PIP_VERBOSITY }} -i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w -r {{ item.item }}
     chdir={{ edxapp_code_dir }}
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   environment: "{{ edxapp_environment }}"
   when: item.stat.exists
   with_items: "{{ python_requirement_files.results }}"
@@ -212,7 +182,7 @@
 
 # Private requriements require a ssh key to install, use the same key as the private key for edx-platform
 # If EDXAPP_INSTALL_PRIVATE_REQUIREMENTS is set to true EDXAPP_USE_GIT_IDENTITY must also be true
-- name : install python private requirements
+- name: install python private requirements
   # Need to use shell rather than pip so that we can maintain the context of our current working directory; some
   # requirements are pathed relative to the edx-platform repo. Using the pip from inside the virtual environment implicitly
   # installs everything into that virtual environment.
@@ -221,7 +191,7 @@
     chdir={{ edxapp_code_dir }}
   with_items:
   - "{{ private_requirements_file }}"
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   environment:
     GIT_SSH: "{{ edxapp_git_ssh }}"
   when: EDXAPP_INSTALL_PRIVATE_REQUIREMENTS
@@ -231,14 +201,14 @@
 
 # Install any custom extra requirements if defined in EDXAPP_EXTRA_REQUIREMENTS.
 - name: install python extra requirements
-  pip: >
-    name="{{ item.name }}"
-    version="{{ item.version|default(omit) }}"
-    extra_args="--exists-action w {{ item.extra_args|default('') }}"
-    virtualenv="{{ edxapp_venv_dir }}"
-    state=present
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version|default(omit) }}"
+    extra_args: "--exists-action w {{ item.extra_args|default('') }}"
+    virtualenv: "{{ edxapp_venv_dir }}"
+    state: present
   with_items: EDXAPP_EXTRA_REQUIREMENTS
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   tags:
     - install
     - install:app-requirements
@@ -246,19 +216,19 @@
 # If using CAS and you have a function for mapping attributes, install
 # the module here.  The next few tasks set up the python code sandbox
 - name: install CAS attribute module
-  pip: >
-    name="{{ EDXAPP_CAS_ATTRIBUTE_PACKAGE }}"
-    virtualenv="{{ edxapp_venv_dir }}"
-    state=present
-    extra_args="-i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w"
-  sudo_user: "{{ edxapp_user }}"
+  pip:
+    name: "{{ EDXAPP_CAS_ATTRIBUTE_PACKAGE }}"
+    virtualenv: "{{ edxapp_venv_dir }}"
+    state: present
+    extra_args: "-i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w"
+  become_user: "{{ edxapp_user }}"
   when: EDXAPP_CAS_ATTRIBUTE_PACKAGE|length > 0
   tags:
     - install
     - install:app-requirements
 
 # Install the sandbox python modules into {{ edxapp_venv_dir }}
-- name : install sandbox requirements into regular venv
+- name: install sandbox requirements into regular venv
   # Need to use shell rather than pip so that we can maintain the context of our current working directory; some
   # requirements are pathed relative to the edx-platform repo. Using the pip from inside the virtual environment implicitly
   # installs everything into that virtual environment.
@@ -269,7 +239,7 @@
   - "{{ sandbox_base_requirements }}"
   - "{{ sandbox_local_requirements }}"
   - "{{ sandbox_post_requirements }}"
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   when: not EDXAPP_PYTHON_SANDBOX
   tags:
     - install
@@ -283,50 +253,50 @@
   command: /usr/sbin/aa-complain /etc/apparmor.d/code.sandbox
   when: EDXAPP_PYTHON_SANDBOX
   tags:
-  - edxapp-sandbox
-  - install
-  - install:app-requirements
+    - edxapp-sandbox
+    - install
+    - install:app-requirements
 
 - name: code sandbox | Install base sandbox requirements and create sandbox virtualenv
-  pip: >
-    requirements="{{ sandbox_base_requirements }}"
-    virtualenv="{{ edxapp_sandbox_venv_dir }}"
-    state=present
-    extra_args="-i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w"
-  sudo_user: "{{ edxapp_sandbox_user }}"
+  pip:
+    requirements: "{{ sandbox_base_requirements }}"
+    virtualenv: "{{ edxapp_sandbox_venv_dir }}"
+    state: present
+    extra_args: "-i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w"
+  become_user: "{{ edxapp_sandbox_user }}"
   when: EDXAPP_PYTHON_SANDBOX
   tags:
-  - edxapp-sandbox
-  - install
-  - install:app-requirements
+    - edxapp-sandbox
+    - install
+    - install:app-requirements
 
 - name: code sandbox | Install sandbox requirements into sandbox venv
   shell: >
     {{ edxapp_sandbox_venv_dir }}/bin/pip install -i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w -r {{ item }}
     chdir={{ edxapp_code_dir }}
   with_items:
-  - "{{ sandbox_local_requirements }}"
-  - "{{ sandbox_post_requirements }}"
-  sudo_user: "{{ edxapp_sandbox_user }}"
+    - "{{ sandbox_local_requirements }}"
+    - "{{ sandbox_post_requirements }}"
+  become_user: "{{ edxapp_sandbox_user }}"
   when: EDXAPP_PYTHON_SANDBOX
   register: sandbox_install_output
   changed_when: sandbox_install_output.stdout is defined and 'installed' in sandbox_install_output.stdout
   tags:
-  - edxapp-sandbox
-  - install
-  - install:app-requirements
+    - edxapp-sandbox
+    - install
+    - install:app-requirements
 
 - name: code sandbox | put code sandbox into aa-enforce or aa-complain mode, depending on EDXAPP_SANDBOX_ENFORCE
   command: /usr/sbin/{{ edxapp_aa_command }} /etc/apparmor.d/code.sandbox
   when: EDXAPP_PYTHON_SANDBOX
   tags:
-  - edxapp-sandbox
-  - install
-  - install:app-requirements
+    - edxapp-sandbox
+    - install
+    - install:app-requirements
 
 - name: compiling all py files in the edx-platform repo
   shell: "{{ edxapp_venv_bin }}/python -m compileall -q -x .git/.* {{ edxapp_code_dir }}"
-  sudo_user: "{{ edxapp_user }}"
+  become_user: "{{ edxapp_user }}"
   tags:
     - install
     - install:code
@@ -335,7 +305,11 @@
   # to the virtualenv but that permission change will require
   # root access.
 - name: give other read permissions to the virtualenv
-  command: chmod -R o+r "{{ edxapp_venv_dir }}"
+  file:
+    path: "{{ edxapp_venv_dir }}"
+    state: directory
+    mode: "o+r"
+    recurse: yes
   tags:
     - install
     - install:code
@@ -356,60 +330,52 @@
 - name: update supervisor configuration
   shell:  "{{ supervisor_ctl }} -c {{ supervisor_cfg }} update"
   register: supervisor_update
-  sudo_user: "{{ supervisor_service_user }}"
+  become_user: "{{ supervisor_service_user }}"
   changed_when: supervisor_update.stdout is defined and supervisor_update.stdout != ""
   when: not disable_edx_services
   tags:
     - manage
 
 - name: ensure edxapp has started
-  supervisorctl: >
-    state=started
-    supervisorctl_path={{ supervisor_ctl }}
-    config={{ supervisor_cfg }}
-    name="edxapp:"
-  sudo_user: "{{ supervisor_service_user }}"
+  supervisorctl:
+    name: "edxapp:"
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: started
+  become_user: "{{ supervisor_service_user }}"
   when: celery_worker is not defined and not disable_edx_services
   tags:
     - manage
 
 - name: ensure edxapp_workers has started
-  supervisorctl: >
-    name="edxapp_worker:"
-    supervisorctl_path={{ supervisor_ctl }}
-    config={{ supervisor_cfg }}
-    state=started
+  supervisorctl:
+    name: "edxapp_worker:"
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: started
   when: celery_worker is defined and not disable_edx_services
-  sudo_user: "{{ supervisor_service_user }}"
+  become_user: "{{ supervisor_service_user }}"
   tags:
     - manage
 
-- name: create symlinks from the venv bin dir
-  file: >
-    src="{{ edxapp_venv_bin }}/{{ item }}"
-    dest={{ COMMON_BIN_DIR }}/{{ item.split('.')[0] }}.edxapp
-    state=link
+- name: create symlinks from the venv bin dir and repo dir
+  file:
+    src: "{{ item }}"
+    dest: "{{ COMMON_BIN_DIR }}/{{ (item | basename).split('.', 1) | first }}.edxapp"
+    state: link
   with_items:
-  - python
-  - pip
-  - django-admin.py
-  tags:
-    - install
-    - install:configuration
-
-- name: create symlinks from the repo dir
-  file: >
-    src="{{ edxapp_code_dir }}/{{ item }}"
-    dest={{ COMMON_BIN_DIR }}/{{ item.split('.')[0] }}.edxapp
-    state=link
-  with_items:
-  - manage.py
+    - '{{ edxapp_venv_bin }}/python'
+    - '{{ edxapp_venv_bin }}/pip'
+    - '{{ edxapp_venv_bin }}/django-admin.py'
+    - '{{ edxapp_code_dir }}/manage.py'
   tags:
     - install
     - install:configuration
 
 - name: remove read-only ssh key
-  file: path={{ edxapp_git_identity }} state=absent
+  file:
+    path: "{{ edxapp_git_identity }}"
+    state: absent
   when: EDXAPP_USE_GIT_IDENTITY
   tags:
     - install
@@ -422,26 +388,27 @@
     - remove
     - aws
 
-- set_fact: edxapp_installed=true
+- set_fact:
+    edxapp_installed: true
 
 - name: restart edxapp
-  supervisorctl: >
-    state=restarted
-    supervisorctl_path={{ supervisor_ctl }}
-    config={{ supervisor_cfg }}
-    name="edxapp:"
+  supervisorctl:
+    name: "edxapp:"
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: restarted
   when: edxapp_installed is defined and celery_worker is not defined and not disable_edx_services
-  sudo_user: "{{ supervisor_service_user }}"
+  become_user: "{{ supervisor_service_user }}"
   tags:
     - manage
 
 - name: restart edxapp_workers
-  supervisorctl: >
-    name="edxapp_worker:"
-    supervisorctl_path={{ supervisor_ctl }}
-    config={{ supervisor_cfg }}
-    state=restarted
+  supervisorctl:
+    name: "edxapp_worker:"
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: restarted
   when: edxapp_installed is defined and celery_worker is defined and not disable_edx_services
-  sudo_user: "{{ common_web_user }}"
+  become_user: "{{ common_web_user }}"
   tags:
     - manage

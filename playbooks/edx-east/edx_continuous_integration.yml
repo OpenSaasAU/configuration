@@ -1,11 +1,10 @@
 - name: Configure instance(s)
   hosts: all
-  sudo: True
+  become: True
   gather_facts: True
   serial: 10
   vars:
     migrate_db: "yes"
-    openid_workaround: True
   roles:
     - aws
     - role: nginx
@@ -24,6 +23,7 @@
     - mysql
     - role: edxlocal
       tags: edxlocal
+    - memcache
     - mongo
     - { role: 'edxapp', celery_worker: True }
     - edxapp

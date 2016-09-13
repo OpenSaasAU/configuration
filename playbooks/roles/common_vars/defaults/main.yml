@@ -13,10 +13,12 @@ COMMON_BASIC_AUTH_EXCEPTIONS:
 
 # Turn on syncing logs on rotation for edx
 # application and tracking logs, must also
-# have the AWS role installed
-COMMON_AWS_SYNC: False
-COMMON_AWS_SYNC_BUCKET: "edx-{{ COMMON_ENVIRONMENT }}-{{ COMMON_DEPLOYMENT }}"
-COMMON_AWS_S3_SYNC_SCRIPT: "{{ COMMON_BIN_DIR }}/send-logs-to-s3"
+# have the aws or openstack role installed
+COMMON_OBJECT_STORE_LOG_SYNC: False
+COMMON_OBJECT_STORE_LOG_SYNC_BUCKET: "edx-{{ COMMON_ENVIRONMENT }}-{{ COMMON_DEPLOYMENT }}"
+COMMON_OBJECT_STORE_LOG_SYNC_PREFIX: "logs/tracking/"
+COMMON_OBJECT_STORE_LOG_SYNC_SCRIPT: "{{ COMMON_BIN_DIR }}/send-logs-to-object-store"
+
 COMMON_BASE_DIR: /edx
 COMMON_DATA_DIR: "{{ COMMON_BASE_DIR}}/var"
 COMMON_APP_DIR: "{{ COMMON_BASE_DIR}}/app"
@@ -66,8 +68,6 @@ COMMON_CUSTOM_DHCLIENT_CONFIG: false
 # uncomment and specifity your domains.
 # COMMON_DHCLIENT_DNS_SEARCH: ["ec2.internal","example.com"]
 
-
-COMMON_MOTD_TEMPLATE: "motd.tail.j2"
 COMMON_SSH_PASSWORD_AUTH: "no"
 
 COMMON_SECURITY_UPDATES: no
@@ -95,21 +95,33 @@ COMMON_ENABLE_NEWRELIC_APP: False
 COMMON_ENABLE_MINOS: False
 COMMON_TAG_EC2_INSTANCE: False
 common_boto_version: '2.34.0'
+common_redhat_pkgs:
+  - ntp
+  - lynx
+  - logrotate
+  - rsyslog
+  - git
+  - unzip
+  - acl
 common_debian_pkgs:
   - ntp
+  - acl
   - lynx-cur
   - logrotate
   - rsyslog
   - git
   - unzip
-  - "python2.7=2.7.10-0+{{ ansible_distribution_release }}1"
   - python-pip
   - python2.7-dev
-  
+
+# Packages that should be installed from our custom PPA, i.e. COMMON_EDX_PPA
+common_custom_debian_pkgs:
+  - "python2.7=2.7.10-0+{{ ansible_distribution_release }}1"
+
 common_pip_pkgs:
-  - pip==7.1.2
-  - setuptools==18.3.2
-  - virtualenv==13.1.2
+  - pip==8.1.2
+  - setuptools==24.0.3
+  - virtualenv==15.0.2
   - virtualenvwrapper==4.7.1
 
 common_web_user: www-data
@@ -136,6 +148,11 @@ vagrant_cluster: False
 common_debian_variants:
   - Ubuntu
   - Debian
+
+# Only attempt to use our custom PPA for these releases
+common_custom_ppa_releases:
+  - precise
+  - trusty
 
 common_redhat_variants:
   - CentOS

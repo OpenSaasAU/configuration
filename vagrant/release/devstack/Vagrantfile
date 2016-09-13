@@ -24,13 +24,13 @@ if [ -n "$OPENEDX_RELEASE" ]; then
     -e certs_version=$OPENEDX_RELEASE \
     -e forum_version=$OPENEDX_RELEASE \
     -e xqueue_version=$OPENEDX_RELEASE \
+    -e demo_version=$OPENEDX_RELEASE \
+    -e NOTIFIER_VERSION=$OPENEDX_RELEASE \
+    -e ECOMMERCE_VERSION=$OPENEDX_RELEASE \
+    -e ECOMMERCE_WORKER_VERSION=$OPENEDX_RELEASE \
+    -e PROGRAMS_VERSION=$OPENEDX_RELEASE \
   "
   CONFIG_VER=$OPENEDX_RELEASE
-  # Need to ensure that the configuration repo is updated
-  # The vagrant-devstack.yml playbook will also do this, but only
-  # after loading the playbooks into memory.  If these are out of date,
-  # this can cause problems (e.g. looking for templates that no longer exist).
-  /edx/bin/update configuration $CONFIG_VER
 else
   CONFIG_VER="master"
 fi
@@ -60,6 +60,15 @@ end
 # to a name and a file path, which are used for retrieving
 # a Vagrant box from the internet.
 openedx_releases = {
+  "open-release/eucalyptus.master" => {
+    :name => "eucalyptus-devstack-2016-08-19", :file => "eucalyptus-devstack-2016-08-19.box",
+  },
+  "open-release/eucalyptus.1rc2" => {
+    :name => "eucalyptus-devstack-2016-08-19", :file => "eucalyptus-devstack-2016-08-19.box",
+  },
+  "open-release/eucalyptus.1" => {
+    :name => "eucalyptus-devstack-2016-08-19", :file => "eucalyptus-devstack-2016-08-19.box",
+  },
   # Note: the devstack and fullstack boxes differ, because devstack had an issue
   # that needed fixing, but it didn't affect fullstack.
   "named-release/dogwood.rc" => {
@@ -87,7 +96,7 @@ openedx_releases = {
   # },
 }
 openedx_releases.default = {
-  :name => "devstack-periodic-2016-05-16", :file => "devstack-periodic-2016-05-16.box",
+  :name => "eucalyptus-devstack-2016-08-19", :file => "eucalyptus-devstack-2016-08-19.box",
 }
 rel = ENV['OPENEDX_RELEASE']
 

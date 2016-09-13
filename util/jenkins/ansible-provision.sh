@@ -18,9 +18,19 @@
 # - environment
 # - name_tag
 set -x
-env
+
+# Seeing the environment is fine, spewing secrets to the log isn't ok
+env | grep -v AWS | grep -v ARN
+
 export PYTHONUNBUFFERED=1
 export BOTO_CONFIG=/var/lib/jenkins/${aws_account}.boto
+
+# docker on OS-X includes your Mac's home directory in the socket path
+# that SSH/Ansible uses for the control socket, pushing you over
+# the 108 character limit.
+if [ -f /.dockerenv ]; then
+    export ANSIBLE_SSH_CONTROL_PATH=/tmp/%%C
+fi
 
 run_ansible() {
   if [[ "$VERBOSE" == "true" ]]; then
@@ -69,7 +79,8 @@ if [[ -z $github_username  ]]; then
   github_username=$BUILD_USER_ID
 fi
 
-if [[ ! -f $BOTO_CONFIG ]]; then
+# Having access keys OR a boto config allows sandboxes to be built.
+if [[ ( -z $AWS_ACCESS_KEY_ID || -z $AWS_SECRET_ACCESS_KEY ) && (! -f $BOTO_CONFIG) ]]; then
   echo "AWS credentials not found for $aws_account"
   exit 1
 fi
@@ -124,7 +135,7 @@ if [[ -z $ami ]]; then
 fi
 
 if [[ -z $instance_type ]]; then
-  instance_type="t2.medium"
+  instance_type="t2.large"
 fi
 
 if [[ -z $enable_newrelic ]]; then
@@ -160,7 +171,6 @@ ssh-keygen -f "/var/lib/jenkins/.ssh/known_hosts" -R "$deploy_host"
 cd playbooks/edx-east
 
 cat << EOF > $extra_vars_file
-ansible_ssh_private_key_file: /var/lib/jenkins/${keypair}.pem
 edx_platform_version: $edxapp_version
 forum_version: $forum_version
 notifier_version: $notifier_version
@@ -168,12 +178,13 @@ xqueue_version: $xqueue_version
 xserver_version: $xserver_version
 certs_version: $certs_version
 configuration_version: $configuration_version
+demo_version: $demo_version
 
 edx_ansible_source_repo: ${configuration_source_repo}
 edx_platform_repo: ${edx_platform_repo}
 
 EDXAPP_PLATFORM_NAME: $sandbox_platform_name
-EDXAPP_COMPREHENSIVE_THEME_DIR: $edxapp_comprehensive_theme_dir
+EDXAPP_COMPREHENSIVE_THEME_DIRS: $edxapp_comprehensive_theme_dirs
 
 EDXAPP_STATIC_URL_BASE: $static_url_base
 EDXAPP_LMS_NGINX_PORT: 80
@@ -199,7 +210,6 @@ NGINX_SET_X_FORWARDED_HEADERS: True
 NGINX_REDIRECT_TO_HTTPS: True
 EDX_ANSIBLE_DUMP_VARS: true
 migrate_db: "yes"
-openid_workaround: True
 rabbitmq_ip: "127.0.0.1"
 rabbitmq_refresh: True
 COMMON_HOSTNAME: $dns_name
@@ -273,6 +283,7 @@ FORUM_NEW_RELIC_APP_NAME: sandbox-${dns_name}-forums
 SANDBOX_USERNAME: $github_username
 EDXAPP_ECOMMERCE_PUBLIC_URL_ROOT: "https://ecommerce-${deploy_host}"
 EDXAPP_ECOMMERCE_API_URL: "https://ecommerce-${deploy_host}/api/v2"
+EDXAPP_COURSE_CATALOG_API_URL: "https://catalog-${deploy_host}/api/v1"
 
 ECOMMERCE_ECOMMERCE_URL_ROOT: "https://ecommerce-${deploy_host}"
 ECOMMERCE_LMS_URL_ROOT: "https://${deploy_host}"
@@ -286,12 +297,13 @@ PROGRAMS_CORS_ORIGIN_WHITELIST:
 
 CREDENTIALS_LMS_URL_ROOT: "https://${deploy_host}"
 CREDENTIALS_DOMAIN: "credentials-${deploy_host}"
-CREDENTIALS_URL_ROOT: "http://{{ CREDENTIALS_DOMAIN }}"
+CREDENTIALS_URL_ROOT: "https://{{ CREDENTIALS_DOMAIN }}"
 CREDENTIALS_SOCIAL_AUTH_REDIRECT_IS_HTTPS: true
 COURSE_DISCOVERY_ECOMMERCE_API_URL: "https://ecommerce-${deploy_host}/api/v2"
 
 DISCOVERY_URL_ROOT: "https://discovery-${deploy_host}"
 DISCOVERY_SOCIAL_AUTH_REDIRECT_IS_HTTPS: true
+DISCOVERY_PROGRAMS_API_URL: "{{ PROGRAMS_URL_ROOT }}/api/v1/"
 
 EOF
 fi
@@ -318,7 +330,6 @@ instance_tags:
 root_ebs_size: $root_ebs_size
 name_tag: $name_tag
 dns_zone: $dns_zone
-rabbitmq_refresh: True
 elb: $elb
 EOF
 
@@ -331,7 +342,7 @@ EOF
     if [[ $server_type == "full_edx_installation" ]]; then
         # additional tasks that need to be run if the
         # entire edx stack is brought up from an AMI
-        run_ansible rabbitmq.yml -i "${deploy_host}," $extra_var_arg --user ubuntu
+        run_ansible rabbitmq.yml -i "${deploy_host}," $extra_var_arg -e 'elb_pre_post=false' --user ubuntu
         run_ansible restart_supervisor.yml -i "${deploy_host}," $extra_var_arg --user ubuntu
     fi
 fi
@@ -356,6 +367,9 @@ if [[ $reconfigure != "true" && $server_type == "full_edx_installation" ]]; then
         if [[ ${deploy[$i]} == "true" ]]; then
             cat $extra_vars_file
             run_ansible ${i}.yml -i "${deploy_host}," $extra_var_arg --user ubuntu
+            if [[ ${i} == "edxapp" ]]; then
+                run_ansible worker.yml -i "${deploy_host}," $extra_var_arg --user ubuntu
+            fi
         fi
     done
 fi

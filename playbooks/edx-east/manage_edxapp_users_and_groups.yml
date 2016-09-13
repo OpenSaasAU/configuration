@@ -6,7 +6,7 @@
 # code style: https://openedx.atlassian.net/wiki/display/OpenOPS/Ansible+Code+Conventions
 # license:    https://github.com/edx/configuration/blob/master/LICENSE.TXT
 #
-# Usage: ansible-playbook -i lms-host-1, -e@path/to/configfile
+# Usage: ansible-playbook -i lms-host-1, -e@/path/to/group/configfile -e@/path/to/user/configfile
 #
 # Overview:
 # This playbook ensures that the specified users and groups exist in the targeted
@@ -19,6 +19,7 @@
 #   - superuser (optional, bool)
 #   - staff (optional, bool)
 #   - remove (optional, bool): ensures the user does not exist
+#   - unusable_password (optional, bool): ensures the password is unusable
 #
 # Groups can have the following properties:
 #   - name (required, str)
@@ -41,6 +42,17 @@
 #   - username: smitty
 #     email: smitty@werbenmanjens.en
 #     groups: [group1]
+#
+#   - username: frank
+#     email: frank@bigcorp.com
+#     staff: false
+#     superuser: false
+#     unusable_password: true
+#     groups: []
+#
+#   - username: zoe
+#     email: zoe@example.com
+#     initial_password_hash: 'pbkdf2_sha256$20000$levJ6jdVYCsu$gdBLGf2DNPqfaKdcETXtFocRU8Kk+sMsIvKkmw1dKbY='
 #
 # groups:
 #   - name: group3
@@ -82,4 +94,6 @@
         {% if item.get('remove') %}--remove{% endif %}
         {% if item.get('superuser') %}--superuser{% endif %}
         {% if item.get('staff') %}--staff{% endif %}
+        {% if item.get('unusable_password') %}--unusable-password{% endif %}
+        {% if item.get('initial_password_hash') %}--initial-password-hash {{ item.initial_password_hash | quote }}{% endif %}
       with_items: django_users
