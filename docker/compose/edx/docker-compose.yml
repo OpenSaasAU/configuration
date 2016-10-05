@@ -47,6 +47,7 @@ services:
    - ${DOCKER_DATA_ROOT}/mongo/data:/data/db
   ports:
    - 27017:27017
+  command: --auth
 
 
 # Need to build our own for ES 0.9
