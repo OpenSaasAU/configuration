@@ -38,11 +38,7 @@
 
 - name: set git fetch.prune to ignore deleted remote refs
   shell: git config --global fetch.prune true
-<<<<<<< HEAD
-#  sudo_user: "{{ edxapp_user }}"
-=======
   become_user: "{{ edxapp_user }}"
->>>>>>> upstream/master
   tags:
     - install
     - install:base
