@@ -119,6 +119,7 @@
   template:
     src: "etc/init/supervisor-upstart.conf.j2"
     dest: "/etc/init/{{ supervisor_service }}.conf"
+    state: file
     owner: root
     group: root
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int < 16
