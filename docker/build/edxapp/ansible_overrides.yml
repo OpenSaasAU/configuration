@@ -33,4 +33,4 @@ worker_core_mult:
   cms: 1
 
 service_variants_enabled:
-  - {{ service_type }}
+  - "{{ service_type }}"
