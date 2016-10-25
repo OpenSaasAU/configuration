@@ -6,8 +6,6 @@ FORUM_MONGO_HOSTS:
   - 'mongo'
   
 FORUM_ELASTICSEARCH_HOST: 'es'
-forum_version: "mongoid5-release"
-
 
 FORUM_ELASTICSEARCH_HOST: "es"
 FORUM_USE_TCP: "true"
