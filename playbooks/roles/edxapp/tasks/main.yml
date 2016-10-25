@@ -98,6 +98,7 @@
   template:
     src: .npmrc.j2
     dest: "{{ edxapp_app_dir }}/.npmrc"
+    state: file
     owner: "{{ edxapp_user }}"
     group: "{{ common_web_group }}"
     mode: 0600
