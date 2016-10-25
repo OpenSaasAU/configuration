@@ -43,7 +43,6 @@
   template:
     src: "{{ item }}.j2"
     dest: "{{ supervisor_available_dir }}/{{ item }}"
-    state: file
     owner: "{{ supervisor_user }}"
     group: "{{ supervisor_user }}"
   become_user: "{{ supervisor_user }}"
