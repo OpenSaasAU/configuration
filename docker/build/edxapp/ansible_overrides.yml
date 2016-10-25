@@ -18,3 +18,8 @@ EDXAPP_MEMCACHE: [ 'memcache:11211' ]
 EDXAPP_LMS_SITE_NAME: 'lms'
 EDXAPP_CMS_SITE_NAME: 'cms'
 EDXAPP_RABBIT_HOSTNAME: 'rabbitmq'
+EDXAPP_PYTHON_SANDBOX: false
+edxapp_cms_gunicorn_host: 0.0.0.0
+edxapp_lms_gunicorn_host: 0.0.0.0
+migrate_db: 'yes'
+COMMON_MYSQL_MIGRATE_USER: 'root'
