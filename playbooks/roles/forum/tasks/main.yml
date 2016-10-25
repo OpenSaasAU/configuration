@@ -71,3 +71,7 @@
 - include: deploy.yml
   tags: 
     - deploy
+
+- include: manage.yml
+  tags: 
+    - manage
