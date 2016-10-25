@@ -125,7 +125,6 @@
 - name: Set the npm registry permissions
   file:
     path: "{{ edxapp_app_dir }}/.npmrc"
-    state: file
     owner: "{{ edxapp_user }}"
     group: "{{ edxapp_user }}"
   tags:

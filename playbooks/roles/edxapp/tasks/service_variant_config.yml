@@ -105,7 +105,6 @@
   template:
     src: "edx/bin/{{ item[0] }}-{{ item[1] }}.j2"
     dest: "{{ COMMON_BIN_DIR }}/{{ item[0] }}-{{ item[1] }}"
-    state: file
     owner: "{{ edxapp_user }}"
     mode: 0755
   with_nested:
