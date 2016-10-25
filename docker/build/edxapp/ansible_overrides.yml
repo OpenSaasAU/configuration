@@ -31,3 +31,6 @@ EDXAPP_COMMENTS_SERVICE_URL: 'http://forums:4567'
 worker_core_mult:
   lms: 1
   cms: 1
+
+service_variants_enabled:
+  - {{ service_type }}
