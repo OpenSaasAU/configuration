@@ -27,3 +27,6 @@ worker_core_mult:
 
 service_variants_enabled:
   - "{{ service_type }}"
+
+edxapp_staticfile_dir: '/edx/var/edxapp/staticfiles/static'
+
