@@ -1,4 +1,4 @@
-FROM opensaas/edx-forums:latest
+FROM edxops/trusty-common:v3
 MAINTAINER edxops
 
 WORKDIR /edx/app/edx_ansible/edx_ansible/docker/plays
