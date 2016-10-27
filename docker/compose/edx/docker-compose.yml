@@ -87,7 +87,7 @@ services:
   # Image built from the opencraft fork as it fixes
   # an auth bug.  Update when the change merges
   # upstream
-  image: edxops/forums:opencraft-v2
+  image: opensaas/edx-forums
   volumes:
    - ${DOCKER_EDX_ROOT}/cs_comments_service:/edx/app/forum/cs_comments_service
   ports:
@@ -103,7 +103,7 @@ services:
 
 
  lms:
-  image: opensaas/edxapp
+  image: opensaas/edxapp:trusty-v3
   ports:
    - 8000:8000
    - 18000:18000
@@ -113,7 +113,7 @@ services:
 
 
  cms:
-  image: opensaas/edxapp
+  image: opensaas/edxapp:trusty-v3
   ports:
    - 8010:8010
    - 18010:18010
