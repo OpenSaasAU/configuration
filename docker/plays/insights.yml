@@ -7,4 +7,6 @@
   serial: "{{ serial_count }}"
   roles:
     - docker
+    - common_vars
+    - { role: libsass, tags: ['install:app-requirements'] }
     - insights
