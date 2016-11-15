@@ -25,6 +25,18 @@
     - install:configuration
     - edxapp_cfg
 
+- name: Remove and recreate the supervisor config directory so nothing stale can exist
+  file:
+      path: "{{ supervisor_cfg_dir }}"
+      state: "{{ item }}"
+      owner: "{{ supervisor_user }}"
+      group: "{{ supervisor_user }}"
+      mode:  "0755"
+  with_items: ['absent', 'directory']
+  tags:
+    - install
+    - install:configuration
+    
 # write the supervisor scripts for the service variants
 - name: "writing {{ item }} supervisor script"
   template:
