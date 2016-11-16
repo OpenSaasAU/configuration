@@ -28,3 +28,5 @@ worker_core_mult:
 
 edxapp_staticfile_dir: '/edx/var/edxapp/staticfiles/static'
 
+EDXAPP_ANALYTICS_DASHBOARD_URL: 'http://insights.{{ EDXAPP_SITE_NAME }}:{{ EDXAPP_CMS_NGINX_PORT }}'
+
