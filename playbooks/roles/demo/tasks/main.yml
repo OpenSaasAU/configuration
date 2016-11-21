@@ -38,4 +38,7 @@
     install:configuration
     deploy
 
-- include: deploy.yml tags=install:configuration
+- include: deploy.yml 
+  tags: 
+    install:configuration
+    deploy
