@@ -35,10 +35,10 @@
     path="{{ demo_app_dir }}" state=directory
     owner="{{ demo_edxapp_user }}" group="{{ common_web_group }}"
   tags:
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy
 
 - include: deploy.yml 
   tags: 
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy

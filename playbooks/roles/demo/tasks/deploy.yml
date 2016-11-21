@@ -7,8 +7,8 @@
   become_user: "{{ demo_edxapp_user }}"
   register: demo_checkout
   tags:
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy
 
 - name: import demo course
   shell: >
@@ -17,8 +17,8 @@
   become_user: "{{ common_web_user }}"
   when: demo_checkout.changed
   tags:
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy
 
 - name: create some test users
   shell: >
@@ -28,8 +28,8 @@
   with_items: demo_test_users
   when: demo_checkout.changed
   tags:
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy
 
 - name: create staff user
   shell: >
@@ -40,8 +40,8 @@
     - demo_checkout.changed
     - DEMO_CREATE_STAFF_USER
   tags:
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy
 
 - name: enroll test users in the demo course
   shell: >
@@ -53,8 +53,8 @@
       - { email: 'staff@example.com' }
   when: demo_checkout.changed
   tags:
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy
 
 
 - name: add test users to the certificate whitelist
@@ -64,8 +64,8 @@
   with_items: demo_test_users
   when: demo_checkout.changed
   tags:
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy
 
 - name: seed the forums for the demo course
   shell: >
@@ -74,5 +74,5 @@
   with_items: demo_test_users
   when: demo_checkout.changed
   tags:
-    install:configuration
-    deploy
+    - install:configuration
+    - deploy
