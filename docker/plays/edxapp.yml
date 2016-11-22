@@ -8,4 +8,4 @@
   roles:
     - common_vars
     - edxapp
-    - {role: demo, when: "edx_install_demo is defined and edx_install_demo == true", tags: "install:configuration"}
+    - {role: demo, when: "edx_install_demo is defined and edx_install_demo == true", tags: ['install:configuration']}
