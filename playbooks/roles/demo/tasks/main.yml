@@ -31,9 +31,11 @@
 #     - demo
 
 - name: create demo app and data dirs
-  file: >
-    path="{{ demo_app_dir }}" state=directory
-    owner="{{ demo_edxapp_user }}" group="{{ common_web_group }}"
+  file:
+    path: "{{ demo_app_dir }}" 
+    state: directory
+    owner: "{{ demo_edxapp_user }}" 
+    group: "{{ common_web_group }}"
   tags:
     - install:configuration
     - deploy
