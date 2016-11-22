@@ -1,5 +1,9 @@
 ---
-
+- name: debug demo git vars
+  debug: 
+    msg: "Code Directory: {{ demo_code_dir }} Demo Repo: {{ demo_repo }} Version: {{ demo_version }}"
+    verbosity: 3
+        
 - name: check out the demo course
   git:
     dest: "{{ demo_code_dir }}"  

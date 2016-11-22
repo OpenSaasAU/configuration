@@ -29,7 +29,11 @@
 #     - common
 #     - edxapp
 #     - demo
-
+- name: debug demo vars
+  debug: 
+    msg: "Data Directory: {{ demo_app_dir }} Demo User: {{ demo_edxapp_user }}"
+    verbosity: 3
+    
 - name: create demo app and data dirs
   file:
     path: "{{ demo_app_dir }}" 
