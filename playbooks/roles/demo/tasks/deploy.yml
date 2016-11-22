@@ -8,9 +8,6 @@
     accept_hostkey: yes
   become_user: "{{ demo_edxapp_user }}"
   register: demo_checkout
-  tags:
-    - install:configuration
-    - deploy
 
 - name: import demo course
   shell: >
@@ -18,9 +15,6 @@
     chdir={{ demo_edxapp_code_dir }}
   become_user: "{{ common_web_user }}"
   when: demo_checkout.changed
-  tags:
-    - install:configuration
-    - deploy
 
 - name: create some test users
   shell: >
@@ -29,9 +23,6 @@
   become_user: "{{ common_web_user }}"
   with_items: demo_test_users
   when: demo_checkout.changed
-  tags:
-    - install:configuration
-    - deploy
 
 - name: create staff user
   shell: >
@@ -41,9 +32,6 @@
   when:
     - demo_checkout.changed
     - DEMO_CREATE_STAFF_USER
-  tags:
-    - install:configuration
-    - deploy
 
 - name: enroll test users in the demo course
   shell: >
@@ -54,9 +42,6 @@
       - "{{ demo_test_users }}"
       - { email: 'staff@example.com' }
   when: demo_checkout.changed
-  tags:
-    - install:configuration
-    - deploy
 
 
 - name: add test users to the certificate whitelist
@@ -65,9 +50,6 @@
     chdir={{ demo_edxapp_code_dir }}
   with_items: demo_test_users
   when: demo_checkout.changed
-  tags:
-    - install:configuration
-    - deploy
 
 - name: seed the forums for the demo course
   shell: >
@@ -75,6 +57,3 @@
     chdir={{ demo_edxapp_code_dir }}
   with_items: demo_test_users
   when: demo_checkout.changed
-  tags:
-    - install:configuration
-    - deploy
